@@ -1,10 +1,7 @@
 package org.example.board.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.board.dto.LoginRequest;
-import org.example.board.dto.UserRequest;
-import org.example.board.dto.UserResponse;
-import org.example.board.dto.UserUpdateRequest;
+import org.example.board.dto.*;
 import org.example.board.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,8 +63,8 @@ public class UserController {
     // =================================================================
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest dto) {
+    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest dto) {
         String token = userService.login(dto);
-        return ResponseEntity.ok(token); // 성공 시 JWT 토큰 문자열 반환
+        return ResponseEntity.ok(new TokenResponse(token));
     }
 }
