@@ -17,12 +17,13 @@ public class JwtProvider {
     private final long expirationTime = 3600000;
 
     // 토큰 생성
-    public String createToken(String username) {
+    public String createToken(String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationTime);
 
         return Jwts.builder()
                 .setSubject(username) // 토큰 주인
+                .claim("role", role) // 권한
                 .setIssuedAt(now)     // 발행 시간
                 .setExpiration(expiryDate) // 만료 시간
                 .signWith(key)        // 서명
@@ -31,12 +32,23 @@ public class JwtProvider {
 
     // 토큰에서 아이디 추출
     public String getUsername(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
 
         return claims.getSubject();
+    }
+
+    // 토큰에서 권한 추출
+    public String getRole(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.get("role", String.class);
     }
 }
