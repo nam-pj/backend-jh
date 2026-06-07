@@ -27,6 +27,7 @@ public class UserService {
         User user = User.builder()
                 .username(dto.getUsername())
                 .password(encodedPassword)
+                .role("ROLE_USER")
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -85,6 +86,6 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호 틀림");
         }
 
-        return jwtProvider.createToken(user.getUsername());
+        return jwtProvider.createToken(user.getUsername(), user.getRole());
     }
 }
