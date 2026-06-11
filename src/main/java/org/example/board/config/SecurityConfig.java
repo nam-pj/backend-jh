@@ -37,11 +37,10 @@ public class SecurityConfig {
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
                         .requestMatchers("/error").permitAll()
-
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .requestMatchers("/user/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/boards/**").permitAll()
-
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
