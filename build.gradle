@@ -1,14 +1,11 @@
 plugins {
     id 'java'
-    // 👇 스프링 부트 버전을 조금 더 최신으로 올립니다.
     id 'org.springframework.boot' version '3.3.0'
-    // 👇 에러의 주범! 이 플러그인 버전을 1.1.6 이상으로 올려야 Gradle 9.2와 호환됩니다.
     id 'io.spring.dependency-management' version '1.1.6'
 }
 group = 'org.example'
 version = '1.0-SNAPSHOT'
 
-// 👇 사용하시는 자바 버전을 명시해 주는 것이 안전합니다 (17 또는 21) 👇
 java {
     sourceCompatibility = '17'
 }
@@ -18,19 +15,25 @@ repositories {
 }
 
 dependencies {
-    // 1. 웹 REST API 개발을 위한 기본 (내장 톰캣 포함)
     implementation 'org.springframework.boot:spring-boot-starter-web'
-
-    // 2. 데이터베이스 관리를 위한 Spring Data JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    // 3. Getter, Setter, 생성자 자동 생성을 위한 Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // 👇 4. JPA를 띄우려면 DB가 꼭 필요합니다. 인메모리 DB(H2) 추가 👇
-    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
 
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+    // --- 테스트 관련 라이브러리들 ---
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

@@ -6,11 +6,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -27,11 +30,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 토큰이 있고 유효하다면 유저 정보 추출
         if (token != null && token.startsWith("Bearer ")) {
             String jwt = token.substring(7);
-            String username = jwtProvider.getUsername(jwt); // 여기서 이전에 만든 메서드를 사용합니다!
+            String username = jwtProvider.getUsername(jwt);
+            String role = jwtProvider.getRole(jwt);
+
+            List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
 
             // 스프링 시큐리티에게 "이 유저 인증됨"이라고 알려주기
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(username, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
