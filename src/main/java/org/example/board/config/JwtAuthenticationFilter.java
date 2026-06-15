@@ -24,6 +24,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+        if (path.startsWith("/ws-stomp")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 헤더에서 토큰 꺼내기
         String token = request.getHeader("Authorization");
 
