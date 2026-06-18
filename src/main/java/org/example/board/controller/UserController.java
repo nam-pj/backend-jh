@@ -27,6 +27,13 @@ public class UserController {
         return ResponseEntity.ok(userService.findByUser(id));
     }
 
+    // 사용자 이름 추출
+    @GetMapping("/name")
+    public ResponseEntity<UserResponse> getMyUsername() {
+        UserResponse response = userService.getMyUsername();
+        return ResponseEntity.ok(response);
+    }
+
     // 사용자 등록
     @PostMapping("")
     public ResponseEntity<UserResponse> signup(@RequestBody UserRequest dto) {

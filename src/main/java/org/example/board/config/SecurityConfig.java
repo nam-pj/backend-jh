@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .requestMatchers("/user/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/boards/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+                        .requestMatchers("/docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/ws-stomp/**").permitAll()
                         .anyRequest().authenticated()
