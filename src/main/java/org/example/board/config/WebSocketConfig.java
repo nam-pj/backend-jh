@@ -1,6 +1,7 @@
 package org.example.board.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.board.interceptor.StompHandshakeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -14,18 +15,19 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompHandler stompHandler;
+    private final StompHandshakeInterceptor stompHandshakeInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-stomp").setAllowedOriginPatterns("*");
+        registry.addEndpoint("/ws-stomp")
+                .addInterceptors(stompHandshakeInterceptor)
+                .setAllowedOriginPatterns("*");
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic", "/queue");
         registry.setApplicationDestinationPrefixes("/app");
-
-        // 1:1 타겟팅을 할 때 사용할 프리픽스를 지정
         registry.setUserDestinationPrefix("/user");
     }
 
