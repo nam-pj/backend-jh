@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/ws-stomp/**").permitAll()
+                        .requestMatchers("/api/follow/**").authenticated() // 추가
+                        .requestMatchers("/api/dm/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
