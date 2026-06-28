@@ -6,6 +6,7 @@ import org.example.board.dto.DmConversationResponse;
 import org.example.board.dto.DmResponse;
 import org.example.board.dto.DmSendRequest;
 import org.example.board.repository.DirectMessageRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
@@ -108,5 +109,17 @@ public class DmController {
     @GetMapping("/unread-count")
     public long getUnreadCount(Principal principal) {
         return directMessageRepository.countByReceiverUsernameAndIsReadFalse(principal.getName());
+    }
+    @PatchMapping("/{senderUsername}/read")
+    public ResponseEntity<?> markAsRead(@PathVariable String senderUsername, Principal principal) {
+
+        List<DirectMessage> unreadMessages = directMessageRepository
+                .findByReceiverUsernameAndSenderUsernameAndIsReadFalse(
+                        principal.getName(), senderUsername);
+
+        unreadMessages.forEach(DirectMessage::markAsRead);
+        directMessageRepository.saveAll(unreadMessages);
+
+        return ResponseEntity.ok(Map.of("message", "읽음 처리 완료"));
     }
 }

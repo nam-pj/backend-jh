@@ -17,4 +17,7 @@ public interface DirectMessageRepository extends JpaRepository<DirectMessage, Lo
 
     // 안 읽은 메시지 개수
     long countByReceiverUsernameAndIsReadFalse(String receiverUsername);
+
+    List<DirectMessage> findByReceiverUsernameAndSenderUsernameAndIsReadFalse(
+            String receiverUsername, String senderUsername);
 }

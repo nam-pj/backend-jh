@@ -12,7 +12,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
-
 @Component
 @RequiredArgsConstructor
 public class StompHandshakeInterceptor implements HandshakeInterceptor {
@@ -31,25 +30,25 @@ public class StompHandshakeInterceptor implements HandshakeInterceptor {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if ("token".equals(cookie.getName())) {
-
-                        String jwt = cookie.getValue();
-
-                        // 토큰 검증 후 통과하면 세션 attribute에 username 저장
-                        String username = jwtProvider.getUsername(jwt);
-                        attributes.put("username", username);
-                        return true;
+                        try {
+                            String jwt = cookie.getValue();
+                            String username = jwtProvider.getUsername(jwt);
+                            attributes.put("username", username);
+                            return true;
+                        } catch (Exception e) {
+                            // 토큰이 유효하지 않으면 조용히 핸드셰이크 거부
+                            return false;
+                        }
                     }
                 }
             }
         }
 
-        // 쿠키가 없거나 token 쿠키를 못 찾으면 핸드셰이크 거부
         return false;
     }
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
                                WebSocketHandler wsHandler, Exception exception) {
-        // 별도 처리 없음
     }
 }
