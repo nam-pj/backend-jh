@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,8 @@ public class DmController {
 
     @MessageMapping("/dm/send")
     public void sendDm(DmSendRequest request, Principal principal) {
-
+        System.out.println("받은 type: " + request.type());
+        System.out.println("받은 roomId: " + request.roomId());
         String senderUsername = principal.getName();
 
         DirectMessage saved = directMessageRepository.save(
@@ -40,6 +42,10 @@ public class DmController {
                         .senderUsername(senderUsername)
                         .receiverUsername(request.receiverUsername())
                         .content(request.content())
+                        .type(request.type() != null ? request.type() : "TALK")
+                        .roomId(request.roomId())
+                        .sentAt(LocalDateTime.now())
+                        .isRead(false)
                         .build()
         );
 
