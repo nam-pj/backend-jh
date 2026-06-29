@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  spring-backend:
+    build: .
+    container_name: spring-server
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=jdbc:postgresql://host.docker.internal:5432/back_jh
+      - DB_USER=postgres
+      - DB_PW=1111
