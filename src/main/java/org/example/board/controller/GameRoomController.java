@@ -52,7 +52,7 @@ public class GameRoomController {
         room.setCurrentTurnIndex(0);
         room.setLastWord("");
         room.setUsedWords(new ArrayList<>());
-        room.setTurnStartTime(LocalDateTime.now()); // 추가
+        room.setTurnStartTime(LocalDateTime.now());
 
         RoomMessage response = new RoomMessage();
         response.setRoomId(msg.getRoomId());
@@ -75,6 +75,12 @@ public class GameRoomController {
         String word = msg.getMessage().trim();
         if (word.isEmpty()) return;
 
+        // ✅ 한 글자 차단 (백엔드에서도 검증)
+        if (word.length() < 2) {
+            sendWrong(msg.getRoomId(), username, word, "두 글자 이상 입력해야 합니다.");
+            return; // 탈락 처리 없이 재입력 기회 부여
+        }
+
         // 1. 이미 사용된 단어 체크
         if (room.getUsedWords().contains(word)) {
             sendWrong(msg.getRoomId(), username, word, "이미 사용된 단어입니다.");
@@ -94,7 +100,7 @@ public class GameRoomController {
             }
         }
 
-        // 3. 실제 존재하는 단어인지 체크 (네이버 API)
+        // 3. 실제 존재하는 단어인지 체크 (국립국어원 API)
         if (!wordValidationService.isValidWord(word)) {
             sendWrong(msg.getRoomId(), username, word, "존재하지 않는 단어입니다.");
             return;
@@ -162,6 +168,7 @@ public class GameRoomController {
             GameRoom room = roomService.getRoom(msg.getRoomId());
             room.removePlayer(username);
 
+            // 1. 일반 퇴장 알림 발송 (기존 유지)
             RoomMessage response = new RoomMessage();
             response.setRoomId(msg.getRoomId());
             response.setSender(username);
@@ -169,8 +176,39 @@ public class GameRoomController {
             response.setPlayers(room.getPlayers());
             broadcast(msg.getRoomId(), response);
 
+            // 2. 방에 아무도 없으면 방 삭제 후 종료
             if (room.getPlayers().isEmpty()) {
                 roomService.removeRoom(msg.getRoomId());
+                return;
+            }
+
+            if (room.isStarted()) {
+
+                // 남은 플레이어 중 생존자(alive == true) 수 계산
+                long aliveCount = room.getPlayers().values().stream()
+                        .filter(p -> p.isAlive())
+                        .count();
+
+                // 남은 사람이 1명 이하라면 게임 종료 처리
+                if (aliveCount <= 1) {
+                    room.setStarted(false);
+
+                    // 최후의 생존자 이름 찾기
+                    String winnerName = room.getPlayers().values().stream()
+                            .filter(p -> p.isAlive())
+                            .map(p -> p.getUsername())
+                            .findFirst()
+                            .orElse("기권승");
+
+                    // 프론트엔드로 게임 종료(ROOM_END) 브로드캐스트 발송
+                    RoomMessage endMsg = new RoomMessage();
+                    endMsg.setRoomId(msg.getRoomId());
+                    endMsg.setType(MessageType.ROOM_END);
+                    endMsg.setWinner(winnerName);
+                    endMsg.setPlayers(room.getPlayers());
+
+                    broadcast(msg.getRoomId(), endMsg);
+                }
             }
         } catch (Exception ignored) {}
     }

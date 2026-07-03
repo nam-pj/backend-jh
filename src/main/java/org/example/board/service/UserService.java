@@ -62,15 +62,15 @@ public class UserService {
 
     // 비밀번호 변경
     @Transactional
-    public UserResponse updatePassword(Long id, String newPassword) {
+    public void updatePassword(Long id, String newPassword) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+        user.updatePassword(passwordEncoder.encode(newPassword));
+    }
 
-        // 비밀번호 변경 및 더티 체킹
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.updatePassword(encodedPassword);
-
-        return new UserResponse(user); // 변경된 정보 반환
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     }
 
     // user 삭제 (단일)

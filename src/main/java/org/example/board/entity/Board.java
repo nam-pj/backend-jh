@@ -5,12 +5,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Board {
 
     @Id
@@ -19,8 +24,12 @@ public class Board {
     private String title;
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩 권장
-    @JoinColumn(name = "user_id") // DB 외래키 컬럼명
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
     public void update(String title, String content) {
