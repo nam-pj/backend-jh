@@ -34,6 +34,15 @@ public class DirectMessage {
     @Column(nullable = false)
     private String type;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private InviteStatus status = InviteStatus.PENDING;
+
+    public void updateStatus(InviteStatus status) {
+        this.status = status;
+    }
+
+
     @Column
     private String roomId;
 

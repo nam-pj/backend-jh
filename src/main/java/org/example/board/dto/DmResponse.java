@@ -9,6 +9,7 @@ public record DmResponse(
         String receiverUsername,
         String content,
         String type,
+        String status,
         String roomId,
         LocalDateTime sentAt
 ) {
@@ -19,6 +20,7 @@ public record DmResponse(
                 message.getReceiverUsername(),
                 message.getContent(),
                 message.getType(),
+                message.getStatus().name(), // enum → String 변환
                 message.getRoomId(),
                 message.getSentAt()
         );

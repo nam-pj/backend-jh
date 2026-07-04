@@ -5,6 +5,7 @@ import org.example.board.entity.DirectMessage;
 import org.example.board.dto.DmConversationResponse;
 import org.example.board.dto.DmResponse;
 import org.example.board.dto.DmSendRequest;
+import org.example.board.entity.InviteStatus;
 import org.example.board.repository.DirectMessageRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -43,6 +44,7 @@ public class DmController {
                         .receiverUsername(request.receiverUsername())
                         .content(request.content())
                         .type(request.type() != null ? request.type() : "TALK")
+                        .status(InviteStatus.PENDING)  // 추가
                         .roomId(request.roomId())
                         .sentAt(LocalDateTime.now())
                         .isRead(false)
@@ -127,5 +129,18 @@ public class DmController {
         directMessageRepository.saveAll(unreadMessages);
 
         return ResponseEntity.ok(Map.of("message", "읽음 처리 완료"));
+    }
+
+    @PatchMapping("/{messageId}/status")
+    public ResponseEntity<?> updateStatus(@PathVariable Long messageId,
+                                          @RequestParam InviteStatus status,
+                                          Principal principal) {
+        return directMessageRepository.findById(messageId)
+                .map(msg -> {
+                    msg.updateStatus(status);
+                    directMessageRepository.save(msg);
+                    return ResponseEntity.ok(Map.of("message", "상태 업데이트 완료"));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
