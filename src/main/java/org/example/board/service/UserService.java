@@ -7,6 +7,7 @@ import org.example.board.dto.UserRequest;
 import org.example.board.dto.UserResponse;
 import org.example.board.entity.User;
 import org.example.board.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,17 +50,27 @@ public class UserService {
                 .toList();
     }
 
+    // user 반환
+    public UserResponse getMyUsername() {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("현재 로그인된 사용자를 찾을 수 없음"));
+
+        return new UserResponse(user);
+    }
+
     // 비밀번호 변경
     @Transactional
-    public UserResponse updatePassword(Long id, String newPassword) {
+    public void updatePassword(Long id, String newPassword) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+        user.updatePassword(passwordEncoder.encode(newPassword));
+    }
 
-        // 비밀번호 변경 및 더티 체킹
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.updatePassword(encodedPassword);
-
-        return new UserResponse(user); // 변경된 정보 반환
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
     }
 
     // user 삭제 (단일)

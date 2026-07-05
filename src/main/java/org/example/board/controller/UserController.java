@@ -2,10 +2,12 @@ package org.example.board.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.board.dto.*;
+import org.example.board.entity.User;
 import org.example.board.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -27,6 +29,13 @@ public class UserController {
         return ResponseEntity.ok(userService.findByUser(id));
     }
 
+    // 사용자 이름 추출
+    @GetMapping("/name")
+    public ResponseEntity<UserResponse> getMyUsername() {
+        UserResponse response = userService.getMyUsername();
+        return ResponseEntity.ok(response);
+    }
+
     // 사용자 등록
     @PostMapping("")
     public ResponseEntity<UserResponse> signup(@RequestBody UserRequest dto) {
@@ -35,15 +44,13 @@ public class UserController {
     }
 
     // 사용자 수정(비밀번호)
-    @PatchMapping("/{id}/password")
-    public ResponseEntity<UserResponse> updatePassword(
-            @PathVariable Long id,
-            @RequestBody UserUpdateRequest dto) {
-
-        userService.updatePassword(id, dto.getNewPassword());
-
-        UserResponse response = userService.findByUser(id);
-        return ResponseEntity.ok(response);
+    @PatchMapping("/me/password")
+    public ResponseEntity<Void> updateMyPassword(
+            @RequestBody UserUpdateRequest dto,
+            Principal principal) {
+        User user = userService.findByUsername(principal.getName());
+        userService.updatePassword(user.getId(), dto.getNewPassword());
+        return ResponseEntity.noContent().build();
     }
 
     // 사용자 삭제(단건)

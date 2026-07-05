@@ -36,13 +36,25 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
 
-                        .requestMatchers("/error").permitAll()
-
+                        // 회원가입, 로그인은 누구나
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .requestMatchers("/user/login").permitAll()
+
+                        // Swagger
+                        .requestMatchers("/docs", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+
+                        // WebSocket
+                        .requestMatchers("/ws-stomp/**").permitAll()
+
+                        // 게시판 조회는 누구나
                         .requestMatchers(HttpMethod.GET, "/api/boards/**").permitAll()
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // /admin/** 은 ADMIN만
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/rooms/**").authenticated()
+
+                        // 나머지 모든 요청은 로그인만 하면 됨 (ADMIN, USER 구분 없이)
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
@@ -55,6 +67,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOrigin("http://localhost:3000");
+        // configuration.addAllowedOrigin("http://localhost:63342"); // 백엔드 테스트용 포트
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
