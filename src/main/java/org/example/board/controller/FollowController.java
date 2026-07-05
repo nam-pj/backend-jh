@@ -8,7 +8,7 @@ import org.example.board.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +71,7 @@ public class FollowController {
     }
 
     // 언팔로우
+    @Transactional
     @DeleteMapping("/{targetUsername}")
     public ResponseEntity<?> unfollow(@PathVariable String targetUsername, Principal principal) {
 
