@@ -23,27 +23,43 @@ public class StompHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
         if (request instanceof ServletServerHttpRequest servletRequest) {
-
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
             Cookie[] cookies = httpRequest.getCookies();
 
+            System.out.println("핸드셰이크 시도 - 쿠키 수: " + (cookies != null ? cookies.length : 0));
+
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
+                    System.out.println("쿠키: " + cookie.getName() + " = " + cookie.getValue().substring(0, Math.min(10, cookie.getValue().length())) + "...");
                     if ("token".equals(cookie.getName())) {
                         try {
-                            String jwt = cookie.getValue();
-                            String username = jwtProvider.getUsername(jwt);
+                            String username = jwtProvider.getUsername(cookie.getValue());
+                            System.out.println("핸드셰이크 인증 성공: " + username);
                             attributes.put("username", username);
                             return true;
                         } catch (Exception e) {
-                            // 토큰이 유효하지 않으면 조용히 핸드셰이크 거부
+                            System.out.println("핸드셰이크 인증 실패: " + e.getMessage());
                             return false;
                         }
                     }
                 }
             }
-        }
 
+            String token = httpRequest.getParameter("token");
+            if (token != null) {
+                try {
+                    String username = jwtProvider.getUsername(token);
+                    System.out.println("쿼리파라미터 인증 성공: " + username);
+                    attributes.put("username", username);
+                    return true;
+                } catch (Exception e) {
+                    System.out.println("쿼리파라미터 인증 실패: " + e.getMessage());
+                    return false;
+                }
+            }
+
+            System.out.println("토큰 없음 - 핸드셰이크 거부");
+        }
         return false;
     }
 
